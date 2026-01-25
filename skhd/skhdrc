@@ -1,0 +1,100 @@
+# move window and follow focus - uses jq for parsing json (brew install jq)
+shift + alt - 1 : yabai -m window --space m1 && \
+                   yabai -m space --focus m1 && \
+                   yabai -m window --focus last
+shift + alt - 2 : yabai -m window --space m2 && \
+                   yabai -m space --focus m2 && \
+                   yabai -m window --focus last
+shift + alt - 3 : yabai -m window --space m3 && \
+                   yabai -m space --focus m3 && \
+                   yabai -m window --focus last
+shift + alt - 4 : yabai -m window --space m4 && \
+                   yabai -m space --focus m4 && \
+                   yabai -m window --focus last
+shift + alt - 5 : yabai -m window --space m5 && \
+                   yabai -m space --focus m5 && \
+                   yabai -m window --focus last
+shift + alt - 6 : yabai -m window --space m6 && \
+                   yabai -m space --focus m6 && \
+                   yabai -m window --focus last
+shift + alt - 7 : yabai -m window --space m7 && \
+                   yabai -m space --focus m7 && \
+                   yabai -m window --focus last
+shift + alt - 8 : yabai -m window --space m8 && \
+                   yabai -m space --focus m8 && \
+                   yabai -m window --focus last
+shift + alt - 9 : yabai -m window --space m9 && \
+                   yabai -m space --focus m9 && \
+                   yabai -m window --focus last
+shift + alt - 0 : yabai -m window --space m10 && \
+                   yabai -m space --focus m10 && \
+                   yabai -m window --focus last
+
+# fast focus desktop
+alt - 1 : yabai -m space --focus m1
+alt - 2 : yabai -m space --focus m2
+alt - 3 : yabai -m space --focus m3
+alt - 4 : yabai -m space --focus m4
+alt - 5 : yabai -m space --focus m5
+alt - 6 : yabai -m space --focus m6
+alt - 7 : yabai -m space --focus m7
+alt - 8 : yabai -m space --focus m8
+alt - 9 : yabai -m space --focus m9
+alt - 0 : yabai -m space --focus m10
+# alt + {1-9} : yabai -m space --focus m{1-9}
+
+# reload skhd
+rcmd - escape : skhd -r
+
+# App Launches:
+
+# kitty
+cmd - return : kitty -d ~
+
+# firefox
+cmd - i : open -n -a Firefox --args
+
+# private firefox
+cmd - b : open -n -a Firefox --args -new-window -no-remote -private-window
+
+# obsidian
+cmd - y : open -n -a Obsidian
+
+# calendar
+cmd - m : open -n -a Calendar
+
+# weather
+cmd - p : open -n -a Weather
+
+# calculator
+cmd - o : open -n -a Calculator
+
+# system settings
+shift + cmd - s : open -n -a "System Settings"
+
+# lf
+cmd - n : kitty -d ~ $HOME/.config/lf/lf-kitty.sh
+
+# neovim
+cmd - u : kitty -d ~ nvim -u $HOME/.config/nvim/init.lua
+
+# Quit/Reload Apps:
+
+# close window & focus on finder in background
+cmd - q : yabai -m window --close
+# && osascript -e 'tell application "Finder" to activate' && yabai -m window --focus last
+
+# restart yabai
+cmd + alt - r : yabai --restart-service
+
+# quit yabai
+cmd + alt - q : yabai --stop-service
+
+# restart sketchybar
+cmd + shift - r : sketchybar --reload
+
+# quit sketchybar
+cmd + shift - q : pkill "sketchybar"
+
+# toggle bluetooth
+shift + cmd - b : blueutil -p toggle

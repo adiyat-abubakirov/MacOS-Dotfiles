@@ -1,0 +1,268 @@
+# Basic settings
+set previewer ~/.config/lf/lf-kitty-preview.sh
+set cleaner ~/.config/lf/lf-kitty-clean.sh
+set icons true
+set history on
+set truncatechar "…"
+set ignorecase true
+set shell bash
+set nohidden
+set preview
+set ratios 1:2:3
+set nodrawbox
+set filesep "\n" # use nul-separation for multiple selections
+set timefmt "  Mon, Jan _2  15:04:05 2006"
+set period 1 # check directory timestamps every second
+
+# Custom functions
+# open file with specific program
+cmd openseparately &{{
+  file="$f"
+  case "$(basename "$file" | tr '[:upper:]' '[:lower:]')" in
+  *.avi | *.mp4 | *.mkv | *.webm | *.mp3 | *.mov | *.mpg | *.gif)
+    open -a "QuickTime Player" "$file"
+  ;;
+  *.pdf | *.jpg | *.jpeg | *.png | *.bmp | *.tiff | *.heic | *.svg)
+    open -a "Preview" "$file"
+  ;;
+  *.ppt | *.pptx)
+    open -a "Microsoft PowerPoint" "$file"
+  ;;
+  *.xls | *.xlsx)
+    open -a "Microsoft Excel" "$file"
+  ;;
+  *.doc | *.docx)
+    open -a "Microsoft Word" "$file"
+  ;;
+  *)
+    kitty nvim -u $HOME/.config/nvim/init.lua "$file"
+  ;;
+  esac
+}}
+
+# copy image
+cmd copyimage &{{
+  ~/.config/as-scripts/copy "$f"
+}}
+
+# make new directory
+cmd makedirectory ${{
+  printf "Directory Name: "
+  read ans
+  mkdir "$ans"
+}}
+
+# make new file
+cmd makefile ${{
+  printf "File Name: "
+  read ans
+  kitty $EDITOR "$ans"
+}}
+
+# unarchive
+cmd unarchive &{{
+  unp -U "$f"
+}}
+
+# go into directory but not into file
+cmd downdir %{{
+	if [ -d "$f" ]; then
+		lf -remote "send $id open"
+    #lf -remote "send $id select \"$f\""
+	fi
+}}
+
+# go back to old directory
+cmd goToPrevious %{{
+	lf -remote "send $id cd '$OLDPWD'"
+}}
+
+cmd disablepreview %{{
+   lf -remote "send $id set preview!"
+   ~/.config/lf/lf-kitty-clean.sh
+}}
+
+# Trash bindings
+cmd tp ${{
+  files=$(printf "$fx" | tr '\n' ';')
+  while [ "$files" ]; do
+    file=${files%%;*}
+
+    trash-put "$(basename "$file")"
+    if [ "$files" = "$file" ]; then
+      files=''
+    else
+      files="${files#*;}"
+    fi
+  done
+}}
+cmd trs ${{
+  trash-restore
+}}
+
+# convert gif to mp4
+cmd convertGifToMp4 ${{
+  files=$(printf "$fx" | tr '\n' ';')
+  while [ "$files" ]; do
+    file=${files%%;*}
+    filename="$(basename "$file")"
+    filename="${filename%.*}"
+
+    ffmpeg -i $filename.gif -movflags faststart -pix_fmt yuv420p -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" $filename.mp4
+    if [ "$files" = "$file" ]; then
+      files=""
+    else
+      files="${files#*;}"
+    fi
+  done
+}}
+
+# compress mp4
+cmd compressMp4 ${{
+  printf "Type CRF value (range=[18,28])(empty=23): "
+  read ans
+  files=$(printf "$fx" | tr '\n' ';')
+  while [ "$files" ]; do
+    file=${files%%;*}
+    filename="$(basename "$file")"
+    if [ -z $ans ]; then
+      ffmpeg -i $filename -vcodec libx264 -crf 23 new.$filename
+    else
+      ffmpeg -i $filename -vcodec libx264 -crf $ans new.$filename
+    fi
+    if [ "$files" = "$file" ]; then
+      files=""
+    else
+      files="${files#*;}"
+    fi
+  done
+}}
+
+cmd to ${{
+  if [ ${1,,} != "upper" && ${1,,} != "lower"]; then
+    exit 1
+  fi
+  files=$(printf "$fx" | tr '\n' ';')
+  while [ "$files" ]; do
+    file=${files%%;*}
+    filename="$(basename "$file")"
+    if [ ${1,,} == "upper" ]; then
+      mv $filename ${filename^^}
+    else
+      mv $filename ${filename,,}
+    fi
+    if [ "$files" = "$file" ]; then
+      files=""
+    else
+      files="${files#*;}"
+    fi
+  done
+}}
+
+# finder
+cmd finder ${{
+  location="$(fzf)"
+  if [ -n "$location" ]; then
+    lf -remote "send $id select $location"
+  fi
+}}
+
+cmd fnameex ${{
+  printf "What exact name to search for?\n"
+  read ans
+  location="$(find / -name "$ans" 2>/dev/null | fzf)"
+  if [ -n "$location" ]; then
+    lf -remote "send $id select $location"
+  fi
+}}
+
+cmd fpathex ${{
+  printf "What exact path to search for?\n"
+  read ans
+  location="$(find / -path "$ans" 2>/dev/null | fzf)"
+  if [ -n "$location" ]; then
+    lf -remote "send $id select $location"
+  fi
+}}
+
+cmd fname ${{
+  printf "What name to search for?\n"
+  read ans
+  location="$(find / -name "*$ans*" 2>/dev/null | fzf)"
+  if [ -n "$location" ]; then
+    lf -remote "send $id select $location"
+  fi
+}}
+
+cmd fpath ${{
+  printf "What path to search for?\n"
+  read ans
+  location="$(find / -path "*$ans*" 2>/dev/null | fzf)"
+  if [ -n "$location" ]; then
+    lf -remote "send $id select $location"
+  fi
+}}
+
+cmd mountDisk ${{
+  lsblk
+  printf "What disk to mount?\n"
+  read ans
+  udisksctl mount -b "$ans"
+}}
+
+cmd unmountDisk ${{
+  lsblk
+  printf "What disk to unmount?\n"
+  read ans
+  udisksctl unmount -b "$ans"
+  udisksctl power-off -b "$ans"
+}}
+
+cmd listDisk ${{
+  lsblk | less
+}}
+
+# Mappings
+map d
+map q
+map g
+map f
+map i
+map w
+# map / finder
+map fn fname
+map fen fnameex
+map fp fpath
+map fep fpathex
+map <enter> openseparately
+map qa unarchive
+map qf makefile
+map qd makedirectory
+map qi copyimage
+map qm mountDisk
+map qu unmountDisk
+map ql listDisk
+map J push 6<down>
+map K push 6<up>
+map dd tp
+map dr trs
+map . set hidden!
+map , disablepreview
+map x cut
+map p paste
+map y copy
+map gc cd ~/.config
+map gd cd ~/Downloads
+map gm cd ~/Media
+map gb cd ~/GitHub
+map gs cd ~/Media/Screenshots
+map gp cd ~/Physics
+map gt cd ~/TXST
+map ge cd /Volumes
+map ga cd ~/Notes
+map gq quit
+map h updir
+map j down
+map k up
+map l downdir
+map R reload

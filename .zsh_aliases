@@ -1,0 +1,24 @@
+# General:
+
+alias rm="rm -v"
+alias lf="$HOME/.config/lf/lf-kitty.sh"
+alias dl='lsblk'
+alias mkdir='mkdir -p'
+alias cp='cp -ir'
+alias diff='diff -q'
+alias mv='mv -i'
+alias ps='ps auxf'
+alias less='less -R'
+alias vi=$EDITOR
+alias svi="sudo -Es $EDITOR"
+alias zhist='history 0 | less'
+alias et='unp -U'
+alias gearlever='flatpak run it.mijorus.gearlever'
+alias feh='feh -.'
+alias screenkey='screenkey -s small -t 3 -p top -f JetBrainsMonoNF'
+alias cl='clang++-19'
+alias nix-darwin-update='sudo darwin-rebuild switch --flake $HOME/.config/nix#default'
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+alias .....='cd ../../../..'

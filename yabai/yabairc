@@ -1,0 +1,88 @@
+#!/usr/bin/env zsh
+
+# redshift
+redshift -O 4000 -P &
+
+# install & load scripting-addition
+sudo yabai --load-sa
+yabai -m signal --add event=dock_did_restart action="sudo yabai --load-sa"
+skhd --start-service &
+
+# General Settings
+yabai -m config \
+  external_bar all:40:0 \
+  menubar_opacity 1.0 \
+  mouse_follows_focus off \
+  focus_follows_mouse off \
+  display_arrangement_order default \
+  window_origin_display default \
+  window_placement second_child \
+  window_insertion_point focused \
+  window_zoom_persist on \
+  window_shadow off \
+  window_animation_duration 0.0 \
+  window_animation_easing ease_out_circ \
+  window_opacity off \
+  window_opacity_duration 0.0 \
+  active_window_opacity 1.0 \
+  normal_window_opacity 0.90 \
+  insert_feedback_color 0x808ec07c \
+  split_ratio 0.52 \
+  split_type auto \
+  auto_balance off \
+  top_padding 8 \
+  bottom_padding 8 \
+  left_padding 8 \
+  right_padding 8 \
+  window_gap 8 \
+  layout bsp \
+  mouse_modifier cmd \
+  mouse_action1 move \
+  mouse_action2 resize \
+  mouse_drop_action swap
+
+yabai -m rule --add app="^Calendar$" sticky=off manage=off
+yabai -m rule --add app="^Bitwarden$" sticky=off manage=off
+yabai -m rule --add app="^Weather$" sticky=off manage=off
+yabai -m rule --add app="^Font Book$" sticky=off manage=off
+yabai -m rule --add app="^System Preferences$" sticky=off manage=off
+yabai -m rule --add app="^System Settings$" sticky=off manage=off
+yabai -m rule --add label="About This Mac" app="System Information" title="About This Mac" manage=off
+yabai -m rule --add label="Safari" app="^Safari$" title="^(General|(Tab|Password|Website|Extension)s|AutoFill|Se(arch|curity)|Privacy|Advance)$" manage=off
+yabai -m rule --add label="Finder" app="^Finder$" title="(Co(py|nnect)|Move|Info|Pref)" manage=off
+
+yabai -m signal --add event=window_destroyed active=yes action="yabai -m query --windows --window &> /dev/null || yabai -m window --focus mouse &> /dev/null || yabai -m window --focus \$(yabai -m query --windows --space | jq .[0].id) &> /dev/null"
+
+echo "yabai configuration loaded.."
+
+# create 9 more desktops
+# while ((yabai -m query --spaces | jq '.[].index | select(. > 1)' >/dev/null 2>&1)); do
+#   yabai -m space --destroy 2
+# done
+# Destroy all spaces except space 1
+while true; do
+  # Query for any space with index > 1
+  space=$(yabai -m query --spaces | jq -re 'map(select(.index > 1)) | .[0] | .index')
+
+  # Break if no such space exists
+  if [ -z "$space" ] || [ "$space" = "null" ]; then
+    break
+  fi
+
+  # Destroy the space
+  yabai -m space "$space" --destroy
+done
+for ((i = 1; i <= 9; i++)); do yabai -m space --create; done
+
+# label yabai spaces (BUG: can switch spaces over time)
+for ((i = 1; i <= 10; i++)); do yabai -m space "$i" --label "m$i"; done
+
+sketchybar &
+
+# JankyBorders
+borders \
+  style=round \
+  width=5.0 \
+  hidpi=on \
+  active_color=0xff8ec07c \
+  inactive_color=0x00000000 &

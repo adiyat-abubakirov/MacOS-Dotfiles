@@ -1,0 +1,39 @@
+#!/usr/bin/osascript
+
+# on run args
+#     set fileTarget to (first item of args)
+#     set the clipboard to (read POSIX file fileTarget as «class PNGf»)
+# end run
+
+on run argv
+    if (count of argv) = 0 then
+        display dialog "No image path provided." buttons {"OK"} default button 1
+        return
+    end if
+
+    set imagePath to item 1 of argv
+    set imageAlias to imagePath as POSIX file as alias
+
+    set nameExtension to name extension of (info for imageAlias)
+
+    if nameExtension is in {"bmp", "BMP"} then
+        set fileType to «class BMP »
+    else if nameExtension is in {"png", "PNG"} then
+        set fileType to «class PNGf»
+    else if nameExtension is in {"gif", "GIF"} then
+        set fileType to GIF picture
+    else if nameExtension is in {"jpg", "jpeg", "JPG", "JPEG"} then
+        set fileType to JPEG picture
+    else if nameExtension is in {"tiff", "tif", "TIFF", "TIF"} then
+        set fileType to TIFF picture
+    else
+        display dialog "Unsupported file type: " & nameExtension buttons {"OK"} default button 1
+        return
+    end if
+
+    try
+        set the clipboard to (read imageAlias as fileType)
+    on error
+        display dialog "Could not read or copy the image." buttons {"OK"} default button 1
+    end try
+end run

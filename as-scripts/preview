@@ -1,0 +1,29 @@
+#!/bin/sh
+
+FILE=$1
+
+if [ -z "$1" ]
+then
+  echo "Dude, I need a file"
+  exit -1
+fi
+
+# ----------------------
+# Applescript below here
+# ----------------------
+
+osascript <<EOF
+
+set fileName to "$FILE"
+
+set posixFile to POSIX file fileName
+tell application "Finder" to open posixFile
+
+delay 2
+tell application "System Events"
+    keystroke "g" using {option down, command down}
+    delay 1
+    keystroke return
+end tell
+
+EOF
